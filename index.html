@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CRIS SysMonitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f4f0;
+            --surface: #fff;
+            --border: #e0ddd6;
+            --border-strong: #c8c4bc;
+            --text-primary: #0d0d0d;
+            --text-secondary: #6b6760;
+            --text-muted: #aaa69e;
+            --accent: #0d0d0d;
+            --mono: 'DM Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--sans);
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        /* ── CONNECT SCREEN ── */
+        #connect-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+
+        .connect-box {
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            padding: 48px;
+            width: 420px;
+        }
+
+        .connect-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .logo-mark {
+            width: 28px; height: 28px;
+            border: 2px solid var(--text-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+        }
+
+        .connect-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .connect-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .input-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .ip-input-row {
+            display: flex;
+            gap: 0;
+            margin-bottom: 12px;
+        }
+
+        .ip-input {
+            flex: 1;
+            font-family: var(--mono);
+            font-size: 14px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-strong);
+            border-right: none;
+            background: var(--bg);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .ip-input:focus {
+            border-color: var(--text-primary);
+            background: var(--surface);
+        }
+
+        .connect-btn {
+            padding: 12px 20px;
+            background: var(--text-primary);
+            color: #fff;
+            border: none;
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .connect-btn:hover { background: #333; }
+
+        .connect-hint {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .connect-error {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: #c0392b;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ── DASHBOARD ── */
+        #dashboard { display: none; }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-strong);
+            padding: 0 40px;
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-left { display: flex; align-items: center; }
+
+        .logo-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 24px;
+            border-right: 1px solid var(--border);
+            height: 100%;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            padding-left: 24px;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .server-tag {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            cursor: pointer;
+            title: "Click to disconnect";
+        }
+
+        .server-tag:hover {
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.1; }
+        }
+
+        .refresh-chip {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-bottom: 1px solid var(--border-strong);
+            background: var(--surface);
+        }
+
+        .stat-cell {
+            padding: 20px 28px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat-cell:last-child { border-right: none; }
+
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-family: var(--mono);
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .section-meta {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .device-table { width: 100%; border-collapse: collapse; }
+
+        .device-table th {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .device-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0ede8;
+            vertical-align: middle;
+        }
+
+        .device-table tr:last-child td { border-bottom: none; }
+        .device-table tbody tr:hover td { background: #faf9f6; }
+
+        .device-name {
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .device-details {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid;
+            font-family: var(--mono);
+        }
+
+        .badge-Keyboard   { border-color: #0d0d0d; color: #0d0d0d; background: #f0ede8; }
+        .badge-Mouse      { border-color: #555; color: #555; background: transparent; }
+        .badge-Camera     { border-color: #777; color: #777; background: transparent; }
+        .badge-Bluetooth  { border-color: #888; color: #888; background: transparent; }
+        .badge-Audio      { border-color: #666; color: #666; background: transparent; }
+        .badge-Storage    { border-color: #0d0d0d; color: #fff; background: #0d0d0d; }
+        .badge-Hub        { border-color: #ddd; color: #bbb; background: transparent; }
+        .badge-Adapter    { border-color: #999; color: #999; background: transparent; }
+        .badge-Display    { border-color: #0d0d0d; color: #0d0d0d; background: transparent; }
+        .badge-Controller { border-color: #ddd; color: #bbb; background: transparent; }
+        .badge-default    { border-color: #ddd; color: #bbb; background: transparent; }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-family: var(--mono);
+        }
+
+        .status::before {
+            content: '';
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .empty-row td {
+            padding: 24px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .footer {
+            border-top: 1px solid var(--border-strong);
+            background: var(--surface);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .disconnect-btn {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            background: none;
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .disconnect-btn:hover {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── CONNECT SCREEN ── -->
+<div id="connect-screen">
+    <div class="connect-box">
+        <div class="connect-logo">
+            <div class="logo-mark">CS</div>
+            <span class="logo-text">SysMonitor</span>
+        </div>
+        <div class="connect-title">Connect to a machine</div>
+        <div class="connect-subtitle">Enter the IP address of the PC running the SysMonitor JAR.</div>
+
+        <label class="input-label">Server IP Address</label>
+        <div class="ip-input-row">
+            <input class="ip-input" id="ip-input" type="text" placeholder="192.168.0.2" spellcheck="false" />
+            <button class="connect-btn" onclick="connect()">Connect</button>
+        </div>
+        <div class="connect-hint">Port 8443 is used by default.</div>
+        <div class="connect-error" id="connect-error">Could not reach the server. Check the IP and make sure the JAR is running.</div>
+    </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-block">
+                <div class="logo-mark">CS</div>
+                <span class="logo-text">SysMonitor</span>
+            </div>
+            <div class="header-meta">
+                <span id="connected-ip"></span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="disconnect-btn" onclick="disconnect()">Disconnect</button>
+            <span class="refresh-chip" id="timer">Refreshing in 10s</span>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                Live
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-cell">
+            <span class="stat-label">USB Devices</span>
+            <span class="stat-number" id="stat-usb">—</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Disk Drives</span>
+            <span class="stat-number" id="stat-disks">—</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">COM Ports</span>
+            <span class="stat-number" id="stat-ports">—</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Audio Devices</span>
+            <span class="stat-number" id="stat-audio">—</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Displays</span>
+            <span class="stat-number" id="stat-display">—</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">USB Devices</span>
+                <span class="section-meta" id="count-usb">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-usb"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Disk Drives</span>
+                <span class="section-meta" id="count-disks">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-disks"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">COM / Serial Ports</span>
+                <span class="section-meta" id="count-ports">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-ports"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Audio Devices</span>
+                <span class="section-meta" id="count-audio">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-audio"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Display Devices</span>
+                <span class="section-meta" id="count-display">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-display"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>Made by PRATHAM GAUR — CRIS Intern</span>
+        <span id="last-updated">—</span>
+    </div>
+
+</div>
+
+<script>
+    const REFRESH_INTERVAL = 10;
+    const STORAGE_KEY = 'cris_server_ip';
+    let BASE_URL = '';
+    let refreshTimer = null;
+    let countdown = REFRESH_INTERVAL;
+
+    // On load, check if IP is saved
+    window.onload = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            document.getElementById('ip-input').value = saved;
+        }
+        document.getElementById('ip-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') connect();
+        });
+    };
+
+    async function connect() {
+        const raw = document.getElementById('ip-input').value.trim();
+        if (!raw) return;
+
+        // Strip protocol/port if user pasted full URL
+        const ip = raw.replace(/^https?:\/\//, '').replace(/:.*$/, '');
+        BASE_URL = 'https://' + ip + ':8443';
+
+        document.getElementById('connect-error').style.display = 'none';
+
+        try {
+            const res = await fetch(BASE_URL + '/api/usb');
+            if (!res.ok) throw new Error('Bad response');
+
+            // Save and show dashboard
+            localStorage.setItem(STORAGE_KEY, raw);
+            document.getElementById('connect-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('connected-ip').textContent = BASE_URL;
+
+            startDashboard();
+        } catch (e) {
+            document.getElementById('connect-error').style.display = 'block';
+        }
+    }
+
+    function disconnect() {
+        localStorage.removeItem(STORAGE_KEY);
+        clearInterval(refreshTimer);
+        BASE_URL = '';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('connect-screen').style.display = 'flex';
+        document.getElementById('ip-input').value = '';
+    }
+
+    function startDashboard() {
+        fetchAll();
+        countdown = REFRESH_INTERVAL;
+        refreshTimer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) {
+                countdown = REFRESH_INTERVAL;
+                fetchAll();
+            }
+            document.getElementById('timer').textContent = `Refreshing in ${countdown}s`;
+        }, 1000);
+    }
+
+    function renderTable(tbodyId, data) {
+        const tbody = document.getElementById(tbodyId);
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No devices detected</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(d => `
+            <tr>
+                <td><span class="device-name">${d.name}</span></td>
+                <td><span class="badge badge-${d.category || 'default'}">${d.category || 'Unknown'}</span></td>
+                <td><span class="status">${d.status}</span></td>
+                <td><span class="device-details">${d.details}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    async function fetchAll() {
+        const endpoints = [
+            { url: '/api/usb',     tbody: 'tbody-usb',     stat: 'stat-usb',     count: 'count-usb'     },
+            { url: '/api/disks',   tbody: 'tbody-disks',   stat: 'stat-disks',   count: 'count-disks'   },
+            { url: '/api/ports',   tbody: 'tbody-ports',   stat: 'stat-ports',   count: 'count-ports'   },
+            { url: '/api/audio',   tbody: 'tbody-audio',   stat: 'stat-audio',   count: 'count-audio'   },
+            { url: '/api/display', tbody: 'tbody-display', stat: 'stat-display', count: 'count-display' },
+        ];
+
+        for (const ep of endpoints) {
+            try {
+                const res  = await fetch(BASE_URL + ep.url);
+                const data = await res.json();
+                renderTable(ep.tbody, data);
+                document.getElementById(ep.stat).textContent  = data.length;
+                document.getElementById(ep.count).textContent = data.length + ' found';
+            } catch (e) {
+                document.getElementById(ep.stat).textContent  = '!';
+                document.getElementById(ep.count).textContent = 'fetch error';
+            }
+        }
+
+        document.getElementById('last-updated').textContent =
+            'Last updated ' + new Date().toLocaleTimeString();
+    }
+</script>
+</body>
+</html>
