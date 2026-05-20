@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SysMonitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f4f0;
+            --surface: #fff;
+            --border: #e0ddd6;
+            --border-strong: #c8c4bc;
+            --text-primary: #0d0d0d;
+            --text-secondary: #6b6760;
+            --text-muted: #aaa69e;
+            --accent: #0d0d0d;
+            --mono: 'DM Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--sans);
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-strong);
+            padding: 0 40px;
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .logo-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 24px;
+            border-right: 1px solid var(--border);
+            height: 100%;
+        }
+
+        .logo-mark {
+            width: 22px; height: 22px;
+            border: 2px solid var(--text-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            padding-left: 24px;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.1; }
+        }
+
+        .refresh-chip {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+        }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-bottom: 1px solid var(--border-strong);
+            background: var(--surface);
+        }
+
+        .stat-cell {
+            padding: 20px 28px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat-cell:last-child { border-right: none; }
+
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-family: var(--mono);
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* ── SECTION ── */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .section-meta {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── TABLE ── */
+        .device-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .device-table th {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .device-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0ede8;
+            vertical-align: middle;
+        }
+
+        .device-table tr:last-child td { border-bottom: none; }
+        .device-table tbody tr:hover td { background: #faf9f6; }
+
+        .device-name {
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .device-details {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ── BADGES ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid;
+            font-family: var(--mono);
+        }
+
+        .badge-Keyboard   { border-color: #0d0d0d; color: #0d0d0d; background: #f0ede8; }
+        .badge-Mouse      { border-color: #555;    color: #555;    background: transparent; }
+        .badge-Camera     { border-color: #777;    color: #777;    background: transparent; }
+        .badge-Bluetooth  { border-color: #888;    color: #888;    background: transparent; }
+        .badge-Audio      { border-color: #666;    color: #666;    background: transparent; }
+        .badge-Storage    { border-color: #0d0d0d; color: #fff;    background: #0d0d0d; }
+        .badge-Hub        { border-color: #ddd;    color: #bbb;    background: transparent; }
+        .badge-Adapter    { border-color: #999;    color: #999;    background: transparent; }
+        .badge-Display    { border-color: #0d0d0d; color: #0d0d0d; background: transparent; }
+        .badge-Controller { border-color: #ddd;    color: #bbb;    background: transparent; }
+        .badge-Serial\ Port { border-color: #aaa;  color: #aaa;    background: transparent; }
+        .badge-default    { border-color: #ddd;    color: #bbb;    background: transparent; }
+
+        /* ── STATUS ── */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-family: var(--mono);
+        }
+
+        .status::before {
+            content: '';
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            display: block;
+            flex-shrink: 0;
+        }
+
+        /* ── EMPTY ── */
+        .empty-row td {
+            padding: 24px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            border-top: 1px solid var(--border-strong);
+            background: var(--surface);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo-block">
+            <div class="logo-mark">CS</div>
+            <span class="logo-text">SysMonitor</span>
+        </div>
+        <div class="header-meta">
+            My 1st project for CRIS
+        </div>
+    </div>
+    <div class="header-right">
+        <span class="refresh-chip" id="timer">Refreshing in 10s</span>
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            Live
+        </div>
+    </div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-cell">
+        <span class="stat-label">USB Devices</span>
+        <span class="stat-number" id="stat-usb">—</span>
+    </div>
+    <div class="stat-cell">
+        <span class="stat-label">Disk Drives</span>
+        <span class="stat-number" id="stat-disks">—</span>
+    </div>
+    <div class="stat-cell">
+        <span class="stat-label">COM Ports</span>
+        <span class="stat-number" id="stat-ports">—</span>
+    </div>
+    <div class="stat-cell">
+        <span class="stat-label">Audio Devices</span>
+        <span class="stat-number" id="stat-audio">—</span>
+    </div>
+    <div class="stat-cell">
+        <span class="stat-label">Displays</span>
+        <span class="stat-number" id="stat-display">—</span>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">USB Devices</span>
+            <span class="section-meta" id="count-usb">loading...</span>
+        </div>
+        <table class="device-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="tbody-usb"></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Disk Drives</span>
+            <span class="section-meta" id="count-disks">loading...</span>
+        </div>
+        <table class="device-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="tbody-disks"></tbody>                            
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">COM / Serial Ports</span>
+            <span class="section-meta" id="count-ports">loading...</span>
+        </div>
+        <table class="device-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="tbody-ports"></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Audio Devices</span>
+            <span class="section-meta" id="count-audio">loading...</span>
+        </div>
+        <table class="device-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="tbody-audio"></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Display Devices</span>
+            <span class="section-meta" id="count-display">loading...</span>
+        </div>
+        <table class="device-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="tbody-display"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="footer">
+    <span>Made by PRATHAM GAUR</span>
+    <span id="last-updated">—</span>
+</div>
+
+<script>
+    const REFRESH_INTERVAL = 10;
+
+    function renderTable(tbodyId, data) {
+        const tbody = document.getElementById(tbodyId);
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No devices detected</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(d => `
+            <tr>
+                <td><span class="device-name">${d.name}</span></td>
+                <td><span class="badge badge-${(d.category || 'default')}">${d.category || 'Unknown'}</span></td>
+                <td><span class="status">${d.status}</span></td>
+                <td><span class="device-details">${d.details}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    async function fetchAll() {
+        const endpoints = [
+            { url: '/api/usb',     tbody: 'tbody-usb',     stat: 'stat-usb',     count: 'count-usb'     },
+            { url: '/api/disks',   tbody: 'tbody-disks',   stat: 'stat-disks',   count: 'count-disks'   },
+            { url: '/api/ports',   tbody: 'tbody-ports',   stat: 'stat-ports',   count: 'count-ports'   },
+            { url: '/api/audio',   tbody: 'tbody-audio',   stat: 'stat-audio',   count: 'count-audio'   },
+            { url: '/api/display', tbody: 'tbody-display', stat: 'stat-display', count: 'count-display' },
+        ];
+
+        for (const ep of endpoints) {
+            try {
+                const res  = await fetch(ep.url);
+                const data = await res.json();
+                renderTable(ep.tbody, data);
+                document.getElementById(ep.stat).textContent  = data.length;
+                document.getElementById(ep.count).textContent = data.length + ' found';
+            } catch (e) {
+                document.getElementById(ep.stat).textContent  = '!';
+                document.getElementById(ep.count).textContent = 'fetch error';
+            }
+        }
+
+        document.getElementById('last-updated').textContent =
+            'Last updated ' + new Date().toLocaleTimeString();
+    }
+
+    let countdown = REFRESH_INTERVAL;
+    setInterval(() => {
+        countdown--;
+        if (countdown <= 0) { countdown = REFRESH_INTERVAL; fetchAll(); }
+        document.getElementById('timer').textContent = `Refreshing in ${countdown}s`;
+    }, 1000);
+
+    fetchAll();
+</script>
+</body>
+</html>
