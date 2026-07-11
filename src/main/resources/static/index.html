@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CRIS SysMonitor V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f4f0;
+            --surface: #fff;
+            --border: #e0ddd6;
+            --border-strong: #c8c4bc;
+            --text-primary: #0d0d0d;
+            --text-secondary: #6b6760;
+            --text-muted: #aaa69e;
+            --mono: 'DM Mono', 'Courier New', monospace;
+            --sans: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+            --cris-accent: #1a3a6b;
+            --cris-accent-light: #eef2f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #f5f4f0;
+            color: #0d0d0d;
+            font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            min-height: 100vh;
+            display: none;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            background: #f5f4f0;
+        }
+        #login-screen.active {
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .login-box {
+            background: #fff;
+            border: 1px solid #c8c4bc;
+            padding: 48px;
+            width: 400px;
+        }
+
+        .connect-logo {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .logo-mark {
+            width: 28px; height: 28px;
+            border: 2px solid #0d0d0d;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            -ms-flex-negative: 0;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+        }
+
+        .login-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            color: #aaa69e;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            margin-bottom: 28px;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #6b6760;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .field-row {
+            display: -ms-flexbox;
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .field-input {
+            -ms-flex: 1;
+            flex: 1;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 12px 16px;
+            border: 1px solid #c8c4bc;
+            border-right: none;
+            background: #f5f4f0;
+            color: #0d0d0d;
+            outline: none;
+        }
+
+        .field-input:focus {
+            border-color: #0d0d0d;
+            background: #fff;
+        }
+
+        .primary-btn {
+            padding: 12px 20px;
+            background: #0d0d0d;
+            color: #fff;
+            border: none;
+            font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .primary-btn:hover { background: #333; }
+        .primary-btn:disabled { background: #ccc; cursor: default; }
+
+        .field-hint {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            color: #aaa69e;
+            margin-bottom: 20px;
+        }
+
+        .form-error {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            color: #c0392b;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #c8c4bc;
+            padding: 0 40px;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: stretch;
+            align-items: stretch;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-left {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .logo-block {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 10px;
+            padding-right: 24px;
+            border-right: 1px solid #e0ddd6;
+            height: 100%;
+        }
+
+        .logo-mark-sm {
+            width: 22px; height: 22px;
+            border: 2px solid #0d0d0d;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .header-meta {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            padding-left: 24px;
+            font-size: 13px;
+            color: #aaa69e;
+            font-family: 'DM Mono', 'Courier New', monospace;
+        }
+
+        .header-right {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .server-tag {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            color: #6b6760;
+            background: #f5f4f0;
+            border: 1px solid #e0ddd6;
+            padding: 3px 10px;
+        }
+
+        .live-indicator {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: #6b6760;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #0d0d0d;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.1; }
+        }
+
+        .refresh-chip {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            color: #aaa69e;
+            background: #f5f4f0;
+            border: 1px solid #e0ddd6;
+            padding: 5px 12px;
+        }
+
+        .disconnect-btn {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            color: #aaa69e;
+            background: none;
+            border: 1px solid #e0ddd6;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        .disconnect-btn:hover { color: #c0392b; border-color: #c0392b; }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: -ms-flexbox;
+            display: flex;
+            border-bottom: 1px solid #c8c4bc;
+            background: #fff;
+        }
+
+        .stat-cell {
+            -ms-flex: 1;
+            flex: 1;
+            padding: 20px 24px;
+            border-right: 1px solid #e0ddd6;
+        }
+
+        .stat-cell:last-child { border-right: none; }
+
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #aaa69e;
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 28px;
+            font-weight: 400;
+            color: #0d0d0d;
+            line-height: 1;
+        }
+
+        .stat-number.cris-stat { color: #1a3a6b; }
+
+        /* ── CONTAINER ── */
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: #fff;
+            border: 1px solid #e0ddd6;
+            margin-bottom: 32px;
+        }
+
+        .section.cris-section {
+            border-left: 3px solid #1a3a6b;
+        }
+
+        .section-header {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid #e0ddd6;
+            background: #f5f4f0;
+        }
+
+        .section.cris-section .section-header {
+            background: #eef2f9;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #0d0d0d;
+        }
+
+        .section.cris-section .section-title { color: #1a3a6b; }
+
+        .section-meta {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            color: #aaa69e;
+        }
+
+        .device-table { width: 100%; border-collapse: collapse; }
+
+        .device-table th {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #aaa69e;
+            padding: 12px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e0ddd6;
+            background: #fff;
+        }
+
+        .device-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0ede8;
+            vertical-align: middle;
+        }
+
+        .device-table tr:last-child td { border-bottom: none; }
+
+        .device-name {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 14px;
+            color: #0d0d0d;
+        }
+
+        .device-details {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 13px;
+            color: #aaa69e;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid;
+            font-family: 'DM Mono', 'Courier New', monospace;
+        }
+
+        .badge-Keyboard   { border-color: #0d0d0d; color: #0d0d0d; background: #f0ede8; }
+        .badge-Mouse      { border-color: #555; color: #555; }
+        .badge-Camera     { border-color: #777; color: #777; }
+        .badge-Bluetooth  { border-color: #888; color: #888; }
+        .badge-Audio      { border-color: #666; color: #666; }
+        .badge-Storage    { border-color: #0d0d0d; color: #fff; background: #0d0d0d; }
+        .badge-Hub        { border-color: #ddd; color: #bbb; }
+        .badge-Adapter    { border-color: #999; color: #999; }
+        .badge-Display    { border-color: #0d0d0d; color: #0d0d0d; }
+        .badge-Controller { border-color: #ddd; color: #bbb; }
+        .badge-CRIS       { border-color: #1a3a6b; color: #1a3a6b; background: #eef2f9; }
+        .badge-default    { border-color: #ddd; color: #bbb; }
+
+        .status {
+            display: inline-block;
+            font-size: 13px;
+            color: #6b6760;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .status:before {
+            content: '';
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: #0d0d0d;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .empty-row td {
+            padding: 24px 20px;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 13px;
+            color: #aaa69e;
+            font-style: italic;
+        }
+
+        .control-btn {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: #1a3a6b;
+            color: #fff;
+            border: none;
+            padding: 7px 16px;
+            cursor: pointer;
+        }
+
+        .control-btn:hover { background: #122d55; }
+
+        .footer {
+            border-top: 1px solid #c8c4bc;
+            background: #fff;
+            padding: 16px 40px;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            color: #aaa69e;
+        }
+
+        /* ── CONTROL PANEL ── */
+        .back-btn {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            color: #aaa69e;
+            background: none;
+            border: 1px solid #e0ddd6;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover { color: #0d0d0d; border-color: #c8c4bc; }
+
+        .control-container {
+            padding: 40px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .device-banner {
+            background: #1a3a6b;
+            color: #fff;
+            padding: 20px 28px;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -ms-flex-align: center;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .device-banner-name {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .device-banner-port {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 13px;
+            opacity: 0.75;
+        }
+
+        .response-box {
+            background: #fff;
+            border: 1px solid #e0ddd6;
+            margin-bottom: 24px;
+        }
+
+        .response-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e0ddd6;
+            background: #f5f4f0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #aaa69e;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .clear-log-btn {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 10px;
+            color: #aaa69e;
+            background: none;
+            border: 1px solid #e0ddd6;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .clear-log-btn:hover { color: #0d0d0d; }
+
+        .response-log {
+            padding: 16px 20px;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 13px;
+            color: #6b6760;
+            min-height: 80px;
+            max-height: 180px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .log-entry { margin-bottom: 4px; }
+        .log-entry.sent { color: #1a3a6b; }
+        .log-entry.received { color: #2e7d32; }
+        .log-entry.error { color: #c0392b; }
+        .log-entry.muted { color: #aaa69e; font-style: italic; }
+
+        .quick-actions-box {
+            background: #fff;
+            border: 1px solid #e0ddd6;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .quick-actions-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #aaa69e;
+            margin-bottom: 14px;
+        }
+
+        .quick-bar {
+            display: -ms-flexbox;
+            display: flex;
+            gap: 10px;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border: 1px solid #c8c4bc;
+            background: #fff;
+            color: #6b6760;
+            cursor: pointer;
+        }
+
+        .quick-btn:hover { background: #f5f4f0; color: #0d0d0d; }
+
+        .cmd-grid {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .cmd-card {
+            background: #fff;
+            border: 1px solid #e0ddd6;
+            -ms-flex: 1 1 400px;
+            flex: 1 1 400px;
+            min-width: 0;
+        }
+
+        .cmd-card-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid #e0ddd6;
+            background: #f5f4f0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #6b6760;
+        }
+
+        .cmd-card-body {
+            padding: 18px;
+        }
+
+        .cmd-row {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .cmd-label {
+            font-size: 11px;
+            color: #aaa69e;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            width: 80px;
+            -ms-flex-negative: 0;
+            flex-shrink: 0;
+        }
+
+        .cmd-input {
+            -ms-flex: 1;
+            flex: 1;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 13px;
+            padding: 8px 12px;
+            border: 1px solid #c8c4bc;
+            background: #f5f4f0;
+            color: #0d0d0d;
+            outline: none;
+        }
+
+        .cmd-input:focus {
+            border-color: #1a3a6b;
+            background: #fff;
+        }
+
+        .cmd-input-sm {
+            width: 70px;
+            -ms-flex: none;
+            flex: none;
+        }
+
+        .cmd-btn {
+            width: 100%;
+            padding: 10px;
+            background: #0d0d0d;
+            color: #fff;
+            border: none;
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .cmd-btn:hover { background: #333; }
+        .cmd-btn:disabled { background: #ccc; cursor: default; }
+        .cmd-btn.cris { background: #1a3a6b; }
+        .cmd-btn.cris:hover { background: #122d55; }
+
+        .color-preview {
+            width: 32px; height: 32px;
+            border: 1px solid #c8c4bc;
+            -ms-flex-negative: 0;
+            flex-shrink: 0;
+            background: #fff;
+            display: inline-block;
+        }
+
+        .color-hint {
+            font-family: 'DM Mono', 'Courier New', monospace;
+            font-size: 11px;
+            color: #aaa69e;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="screen active">
+    <div class="login-box">
+        <div class="connect-logo">
+            <div class="logo-mark">CS</div>
+            <span class="logo-text">SysMonitor V2</span>
+        </div>
+        <div class="login-title">Connect to machine</div>
+        <div class="login-subtitle">Enter server address and password to continue.</div>
+
+        <label class="field-label">Server Address</label>
+        <div class="field-row">
+            <input class="field-input" id="ip-input" type="text"
+                   placeholder="192.168.0.4 or abc.trycloudflare.com" />
+        </div>
+        <div class="field-hint" style="margin-bottom:20px">Local IP uses port 8443. Cloudflare URLs need no port.</div>
+
+        <label class="field-label">Password</label>
+        <div class="field-row">
+            <input class="field-input" id="pw-input" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+            <button class="primary-btn" id="connect-btn" onclick="login()">Connect</button>
+        </div>
+
+        <div class="form-error" id="login-error">Incorrect password or server unreachable.</div>
+    </div>
+</div>
+
+<div id="dashboard-screen" class="screen">
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-block">
+                <div class="logo-mark-sm">CS</div>
+                <span class="logo-text" style="font-size:13px">SysMonitor</span>
+            </div>
+            <div class="header-meta">
+                Centre for Railway Information Systems &nbsp;/&nbsp; Ministry of Railways
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="server-tag" id="connected-addr"></span>
+            <button class="disconnect-btn" onclick="logout()">Logout</button>
+            <span class="refresh-chip" id="timer">Refreshing in 10s</span>
+            <div class="live-indicator"><div class="live-dot"></div>Live</div>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-cell">
+            <span class="stat-label">CRIS Devices</span>
+            <span class="stat-number cris-stat" id="stat-cris">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">USB Devices</span>
+            <span class="stat-number" id="stat-usb">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Disk Drives</span>
+            <span class="stat-number" id="stat-disks">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">COM Ports</span>
+            <span class="stat-number" id="stat-ports">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Audio Devices</span>
+            <span class="stat-number" id="stat-audio">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Displays</span>
+            <span class="stat-number" id="stat-display">&#8212;</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weight Readings</span>
+            <span class="stat-number" id="stat-weighing">&#8212;</span>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="section cris-section">
+            <div class="section-header">
+                <span class="section-title">CRIS Devices</span>
+                <span class="section-meta" id="count-cris">scanning...</span>
+            </div>
+            <table class="device-table">
+                <thead>
+                <tr>
+                    <th>Port</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="tbody-cris"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">USB Devices</span>
+                <span class="section-meta" id="count-usb">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-usb"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Disk Drives</span>
+                <span class="section-meta" id="count-disks">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-disks"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">COM / Serial Ports</span>
+                <span class="section-meta" id="count-ports">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-ports"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Weighing Machine</span>
+                <span class="section-meta" id="count-weighing">waiting for data...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Port</th><th>Category</th><th>Status</th><th>Latest Reading</th><th>Last Seen</th></tr></thead>
+                <tbody id="tbody-weighing"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Audio Devices</span>
+                <span class="section-meta" id="count-audio">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-audio"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Display Devices</span>
+                <span class="section-meta" id="count-display">loading...</span>
+            </div>
+            <table class="device-table">
+                <thead><tr><th>Name</th><th>Category</th><th>Status</th><th>Details</th></tr></thead>
+                <tbody id="tbody-display"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <span>CRIS Internship V2 &mdash; Parcel Management System Group</span>
+        <span id="last-updated">&#8212;</span>
+    </div>
+</div>
+
+<div id="control-screen" class="screen">
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-block">
+                <div class="logo-mark-sm">CS</div>
+                <span class="logo-text" style="font-size:13px">SysMonitor</span>
+            </div>
+            <div class="header-meta">Device Control Panel</div>
+        </div>
+        <div class="header-right">
+            <button class="back-btn" onclick="showDashboard()">&#8592; Back to Dashboard</button>
+        </div>
+    </div>
+
+    <div class="control-container">
+
+        <div class="device-banner">
+            <div>
+                <div class="device-banner-name" id="ctrl-device-name">CRIS QR Display Device</div>
+                <div class="device-banner-port" id="ctrl-device-port"></div>
+            </div>
+            <div style="font-family:'DM Mono','Courier New',monospace;font-size:12px;opacity:0.7">CRIS &mdash; QR Display Controller</div>
+        </div>
+
+        <div class="response-box">
+            <div class="response-header">
+                Device Log
+                <button class="clear-log-btn" onclick="clearLog()">Clear</button>
+            </div>
+            <div class="response-log" id="response-log">
+                <div class="log-entry muted">Ready. Send a command to see device response.</div>
+            </div>
+        </div>
+
+        <div class="quick-actions-box">
+            <div class="quick-actions-label">Quick Actions</div>
+            <div class="quick-bar">
+                <button class="quick-btn" onclick="quickCmd('firmware')">Firmware Info</button>
+                <button class="quick-btn" onclick="quickCmd('version')">Version</button>
+                <button class="quick-btn" onclick="quickCmd('serialno')">Serial No.</button>
+                <button class="quick-btn" style="border-color:#c0392b;color:#c0392b;" onclick="quickCmd('cleardisplay')">Clear Display</button>
+            </div>
+        </div>
+
+        <div class="cmd-grid">
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Display Text</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Text</span>
+                        <input class="cmd-input" id="ds-text" type="text" placeholder="Enter text to show..." />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Row</span>
+                        <input class="cmd-input cmd-input-sm" id="ds-row" type="number" value="20" />
+                        <span class="cmd-label" style="width:40px">Col</span>
+                        <input class="cmd-input cmd-input-sm" id="ds-col" type="number" value="8" />
+                        <span class="cmd-label" style="width:60px">Size</span>
+                        <input class="cmd-input cmd-input-sm" id="ds-size" type="number" value="24" />
+                    </div>
+                    <button class="cmd-btn cris" onclick="sendDisplayString()">Send Text &rarr;</button>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Display QR Code</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Content</span>
+                        <input class="cmd-input" id="qr-text" type="text" placeholder="UPI link, URL, text..." />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Row</span>
+                        <input class="cmd-input cmd-input-sm" id="qr-row" type="number" value="10" />
+                        <span class="cmd-label" style="width:40px">Col</span>
+                        <input class="cmd-input cmd-input-sm" id="qr-col" type="number" value="10" />
+                        <span class="cmd-label" style="width:60px">Width</span>
+                        <input class="cmd-input cmd-input-sm" id="qr-width" type="number" value="100" />
+                    </div>
+                    <button class="cmd-btn cris" onclick="sendQRCode()">Show QR &rarr;</button>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Foreground Color</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Hex Color</span>
+                        <input class="cmd-input" id="fg-color" type="text" value="#FFFF" placeholder="#F800" onchange="updateColorPreviews()" onkeyup="updateColorPreviews()" />
+                        <div class="color-preview" id="fg-preview"></div>
+                    </div>
+                    <div class="color-hint">
+                        #F800 = Red &nbsp;|&nbsp; #07E0 = Green &nbsp;|&nbsp; #001F = Blue &nbsp;|&nbsp; #FFFF = White
+                    </div>
+                    <button class="cmd-btn" onclick="sendForegroundColor()">Set Foreground &rarr;</button>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Background Color</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Hex Color</span>
+                        <input class="cmd-input" id="bg-color" type="text" value="#0000" placeholder="#0000" onchange="updateColorPreviews()" onkeyup="updateColorPreviews()" />
+                        <div class="color-preview" id="bg-preview"></div>
+                    </div>
+                    <div class="color-hint">
+                        #0000 = Black &nbsp;|&nbsp; #FFFF = White &nbsp;|&nbsp; #F800 = Red
+                    </div>
+                    <button class="cmd-btn" onclick="sendBackgroundColor()">Set Background &rarr;</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div id="barcode-screen" class="screen">
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-block">
+                <div class="logo-mark-sm">CS</div>
+                <span class="logo-text" style="font-size:13px">SysMonitor</span>
+            </div>
+            <div class="header-meta">Barcode Printer Control Panel</div>
+        </div>
+        <div class="header-right">
+            <button class="back-btn" onclick="showDashboard()">&#8592; Back to Dashboard</button>
+        </div>
+    </div>
+
+    <div class="control-container" style="max-width:1100px;">
+
+        <div class="device-banner">
+            <div>
+                <div class="device-banner-name" id="bc-device-name">Zebra ZPL Barcode Printer</div>
+                <div class="device-banner-port" id="bc-device-port"></div>
+            </div>
+            <div style="font-family:'DM Mono','Courier New',monospace;font-size:12px;opacity:0.7">CRIS &mdash; Parcel Label Printer</div>
+        </div>
+
+        <div class="response-box">
+            <div class="response-header">
+                Print Log
+                <button class="clear-log-btn" onclick="clearBcLog()">Clear</button>
+            </div>
+            <div class="response-log" id="bc-log">
+                <div class="log-entry muted">Ready. Fill in parcel details and click Print Label.</div>
+            </div>
+        </div>
+
+        <div class="cmd-grid">
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Parcel Identity</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">PWB No.</span>
+                        <input class="cmd-input" id="p-Pwbltno" type="text" placeholder="e.g. 1234567890" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Form No.</span>
+                        <input class="cmd-input" id="p-FormNo" type="text" placeholder="e.g. 23796" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Booking Dt.</span>
+                        <input class="cmd-input" id="p-BookingDt" type="text" placeholder="e.g. 08Jun26" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Bk. DateTime</span>
+                        <input class="cmd-input" id="p-booking_dtDDMMYYYYHHMI" type="text" placeholder="0806202612:00" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Bk. Type</span>
+                        <input class="cmd-input" id="p-bktype" type="text" placeholder="e.g. PWB, LT" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Railway</span>
+                        <input class="cmd-input" id="p-railway" type="text" placeholder="e.g. NR, WR" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Scale Code</span>
+                        <input class="cmd-input" id="p-strScalecd" type="text" placeholder="e.g. 1" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Consignor / Consignee</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">From Name</span>
+                        <input class="cmd-input" id="p-ConsignorName" type="text" placeholder="Sender name" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">From Addr.</span>
+                        <input class="cmd-input" id="p-ConsignorAdd" type="text" placeholder="Sender address" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">To Name</span>
+                        <input class="cmd-input" id="p-ConsineeName" type="text" placeholder="Receiver name" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">To Addr.</span>
+                        <input class="cmd-input" id="p-ConsigneeAdd" type="text" placeholder="Receiver address" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Route</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Src. Stn.</span>
+                        <input class="cmd-input" id="p-SrcStn" type="text" placeholder="e.g. NDLS" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Dst. Stn.</span>
+                        <input class="cmd-input" id="p-DstnStn" type="text" placeholder="e.g. CSTM" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Via</span>
+                        <input class="cmd-input" id="p-strViastn" type="text" placeholder="e.g. BRC-ADI" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Trans. Stn.</span>
+                        <input class="cmd-input" id="p-trnsstn" type="text" placeholder="Transit station" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Train Type</span>
+                        <input class="cmd-input" id="p-strTrntype" type="text" placeholder="e.g. SF, EXP" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Distance</span>
+                        <input class="cmd-input" id="p-Distance" type="text" placeholder="e.g. 1400" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Src. Hindi</span>
+                        <input class="cmd-input" id="p-stnDetailsHindi" type="text" placeholder="Station in Hindi" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Dst. Hindi</span>
+                        <input class="cmd-input" id="p-dstnstnHindi" type="text" placeholder="Destination in Hindi" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Package &amp; Weight</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">No. of Pkg.</span>
+                        <input class="cmd-input" id="p-nop" type="text" placeholder="e.g. 3" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Items/Wt</span>
+                        <input class="cmd-input" id="p-stritmnoDwt" type="text" placeholder="itmno~wt~rechkwt~type~chrgwt~desc" />
+                    </div>
+                    <div class="color-hint" style="margin-bottom:12px;">Format: item~weight~recheck~itemType~chargedWt~desc — use @ to separate multiple items</div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Total Wt.</span>
+                        <input class="cmd-input" id="p-totalweight" type="text" placeholder="e.g. 150" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Chrg. Wt.</span>
+                        <input class="cmd-input" id="p-totalchrgweight" type="text" placeholder="e.g. 150" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Pkg B/V</span>
+                        <input class="cmd-input" id="p-totpkgbrakevan" type="text" placeholder="0" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Wt B/V</span>
+                        <input class="cmd-input" id="p-totwtbrakevan" type="text" placeholder="0" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="cmd-card">
+                <div class="cmd-card-header">Commodity</div>
+                <div class="cmd-card-body">
+                    <div class="cmd-row">
+                        <span class="cmd-label">Commodity</span>
+                        <input class="cmd-input" id="p-majcommd" type="text" placeholder="e.g. GENERAL" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Int. Commd.</span>
+                        <input class="cmd-input" id="p-intMajcommd" type="text" placeholder="e.g. 1" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Container</span>
+                        <input class="cmd-input" id="p-cntr" type="text" placeholder="e.g. 1" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Lost Item</span>
+                        <input class="cmd-input" id="p-lost_item_type" type="text" placeholder="Leave blank if none" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Rajdhani</span>
+                        <input class="cmd-input" id="p-Rajdhani_flag" type="text" placeholder="Y or N" value="N" />
+                    </div>
+                    <div class="cmd-row">
+                        <span class="cmd-label">Unld. Hrs.</span>
+                        <input class="cmd-input" id="p-unld_hrs" type="text" placeholder="0" value="0" />
+                    </div>
+                    <button class="cmd-btn cris" style="margin-top:16px;" onclick="submitBarcodePrint()">&#128424; Print Label &rarr;</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── State ─────────────────────────────────────────────────────────────────────
+    var STORAGE_KEY      = 'cris_v2_server';
+    var TOKEN_KEY        = 'cris_v2_token';
+    var REFRESH_INTERVAL = 10;
+
+    var BASE_URL     = '';
+    var AUTH_TOKEN   = '';
+    var refreshTimer = null;
+    var countdown    = REFRESH_INTERVAL;
+    var activePort        = '';
+    var activeBarcodePort = '';
+
+    // ── Screens ───────────────────────────────────────────────────────────────────
+    function showScreen(id) {
+        var screens = document.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) {
+            screens[i].className = screens[i].className.replace(' active', '').replace('active', '');
+        }
+        var el = document.getElementById(id);
+        el.className += ' active';
+    }
+
+    function showDashboard() {
+        showScreen('dashboard-screen');
+        startRefresh();
+    }
+
+    // ── XHR helper ────────────────────────────────────────────────────────────────
+    // Wraps XMLHttpRequest in a callback-style interface.
+    // options: { method, headers, body, onSuccess(statusCode, responseText), onError(err) }
+    function xhr(url, options) {
+        var req = new XMLHttpRequest();
+        req.open(options.method || 'GET', url, true);
+
+        var headers = options.headers || {};
+        for (var key in headers) {
+            if (headers.hasOwnProperty(key)) {
+                req.setRequestHeader(key, headers[key]);
+            }
+        }
+
+        req.onreadystatechange = function() {
+            if (req.readyState !== 4) return;
+            if (typeof options.onSuccess === 'function') {
+                options.onSuccess(req.status, req.responseText);
+            }
+        };
+
+        req.onerror = function() {
+            if (typeof options.onError === 'function') {
+                options.onError('Network error');
+            }
+        };
+
+        req.send(options.body || null);
+    }
+
+    // Authenticated XHR — automatically attaches Bearer token
+    function authXhr(path, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+        xhr(BASE_URL + path, options);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────────
+    window.onload = function() {
+        var savedAddr  = localStorage.getItem(STORAGE_KEY);
+        var savedToken = localStorage.getItem(TOKEN_KEY);
+
+        if (savedAddr) {
+            document.getElementById('ip-input').value = savedAddr;
+        }
+
+        document.getElementById('pw-input').onkeydown = function(e) {
+            var key = e.key || e.keyCode;
+            if (key === 'Enter' || key === 13) login();
+        };
+
+        document.getElementById('ip-input').onkeydown = function(e) {
+            var key = e.key || e.keyCode;
+            if (key === 'Enter' || key === 13) document.getElementById('pw-input').focus();
+        };
+
+        // Try to restore session
+        if (savedAddr && savedToken) {
+            BASE_URL   = buildBaseUrl(savedAddr);
+            AUTH_TOKEN = savedToken;
+
+            authXhr('/api/cris/devices', {
+                onSuccess: function(status) {
+                    if (status === 200) {
+                        document.getElementById('connected-addr').innerHTML = BASE_URL;
+                        showScreen('dashboard-screen');
+                        startRefresh();
+                    } else {
+                        clearSession();
+                    }
+                },
+                onError: function() {
+                    clearSession();
+                }
+            });
+        }
+    };
+
+    // ── Auth ──────────────────────────────────────────────────────────────────────
+    function buildBaseUrl(raw) {
+        var host = raw.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        var isLocal = /^[\d.]+$/.test(host.split(':')[0]) || host === 'localhost';
+        if (isLocal) {
+            return 'https://' + host.replace(/:.*$/, '') + ':8443';
+        }
+        return 'https://' + host;
+    }
+
+    function login() {
+        var addr  = document.getElementById('ip-input').value;
+        var pw    = document.getElementById('pw-input').value;
+        var errEl = document.getElementById('login-error');
+        var btn   = document.getElementById('connect-btn');
+
+        // trim manually for IE
+        addr = addr.replace(/^\s+|\s+$/g, '');
+        pw   = pw.replace(/^\s+|\s+$/g, '');
+
+        errEl.style.display = 'none';
+
+        if (!addr || !pw) {
+            errEl.innerHTML = 'Enter server address and password.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        BASE_URL = buildBaseUrl(addr);
+        btn.disabled = true;
+        btn.innerHTML = 'Connecting...';
+
+        xhr(BASE_URL + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw }),
+            onSuccess: function(status, text) {
+                btn.disabled = false;
+                btn.innerHTML = 'Connect';
+
+                if (status === 200) {
+                    var data = JSON.parse(text);
+                    AUTH_TOKEN = data.token;
+                    localStorage.setItem(STORAGE_KEY, addr);
+                    localStorage.setItem(TOKEN_KEY, AUTH_TOKEN);
+
+                    document.getElementById('connected-addr').innerHTML = BASE_URL;
+                    document.getElementById('pw-input').value = '';
+                    showScreen('dashboard-screen');
+                    startRefresh();
+                } else {
+                    errEl.innerHTML = 'Incorrect password.';
+                    errEl.style.display = 'block';
+                }
+            },
+            onError: function() {
+                btn.disabled = false;
+                btn.innerHTML = 'Connect';
+                errEl.innerHTML = 'Cannot reach server. Check the address and ensure the JAR is running.';
+                errEl.style.display = 'block';
+            }
+        });
+    }
+
+    function logout() {
+        authXhr('/auth/logout', {
+            method: 'POST',
+            onSuccess: function() { clearSession(); },
+            onError:   function() { clearSession(); }
+        });
+    }
+
+    function clearSession() {
+        AUTH_TOKEN = '';
+        localStorage.removeItem(TOKEN_KEY);
+        if (refreshTimer) clearInterval(refreshTimer);
+        showScreen('login-screen');
+    }
+
+    // ── Dashboard refresh ─────────────────────────────────────────────────────────
+    function startRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        fetchAll();
+        countdown = REFRESH_INTERVAL;
+        refreshTimer = setInterval(function() {
+            countdown--;
+            if (countdown <= 0) {
+                countdown = REFRESH_INTERVAL;
+                fetchAll();
+            }
+            document.getElementById('timer').innerHTML = 'Refreshing in ' + countdown + 's';
+        }, 1000);
+    }
+
+    function fetchAll() {
+        // CRIS devices
+        authXhr('/api/cris/devices', {
+            onSuccess: function(status, text) {
+                if (status === 401) { clearSession(); return; }
+                try {
+                    var data = JSON.parse(text);
+                    renderCrisTable(data);
+                    document.getElementById('stat-cris').innerHTML = data.length;
+                } catch(e) {
+                    document.getElementById('stat-cris').innerHTML = '!';
+                    document.getElementById('count-cris').innerHTML = 'parse error';
+                }
+            },
+            onError: function() {
+                document.getElementById('stat-cris').innerHTML = '!';
+                document.getElementById('count-cris').innerHTML = 'fetch error';
+            }
+        });
+
+        // Weighing machine
+        authXhr('/api/weighing/latest', {
+            onSuccess: function(status, text) {
+                try {
+                    var d = JSON.parse(text);
+                    renderWeighingTable(d);
+                    document.getElementById('stat-weighing').innerHTML = d.length;
+                } catch(e) {
+                    document.getElementById('stat-weighing').innerHTML = '!';
+                    document.getElementById('count-weighing').innerHTML = 'parse error';
+                }
+            },
+            onError: function() {
+                document.getElementById('stat-weighing').innerHTML = '!';
+                document.getElementById('count-weighing').innerHTML = 'fetch error';
+            }
+        });
+
+        // Standard sections
+        var endpoints = [
+            { url: '/api/usb',     tbody: 'tbody-usb',     stat: 'stat-usb',     count: 'count-usb'     },
+            { url: '/api/disks',   tbody: 'tbody-disks',   stat: 'stat-disks',   count: 'count-disks'   },
+            { url: '/api/ports',   tbody: 'tbody-ports',   stat: 'stat-ports',   count: 'count-ports'   },
+            { url: '/api/audio',   tbody: 'tbody-audio',   stat: 'stat-audio',   count: 'count-audio'   },
+            { url: '/api/display', tbody: 'tbody-display', stat: 'stat-display', count: 'count-display' }
+        ];
+
+        for (var i = 0; i < endpoints.length; i++) {
+            (function(ep) {
+                authXhr(ep.url, {
+                    onSuccess: function(status, text) {
+                        try {
+                            var d = JSON.parse(text);
+                            renderTable(ep.tbody, d);
+                            document.getElementById(ep.stat).innerHTML  = d.length;
+                            document.getElementById(ep.count).innerHTML = d.length + ' found';
+                        } catch(e) {
+                            document.getElementById(ep.stat).innerHTML  = '!';
+                            document.getElementById(ep.count).innerHTML = 'parse error';
+                        }
+                    },
+                    onError: function() {
+                        document.getElementById(ep.stat).innerHTML  = '!';
+                        document.getElementById(ep.count).innerHTML = 'fetch error';
+                    }
+                });
+            })(endpoints[i]);
+        }
+
+        var now = new Date();
+        document.getElementById('last-updated').innerHTML = 'Last updated ' + now.toLocaleTimeString();
+    }
+
+    // ── Table renderers ───────────────────────────────────────────────────────────
+    function renderCrisTable(data) {
+        var tbody = document.getElementById('tbody-cris');
+        document.getElementById('count-cris').innerHTML = data.length + ' found';
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No CRIS devices detected.</td></tr>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            var isBc = d.type === 'BARCODE_PRINTER';
+            var port = d.portName || d.name || '';          // <-- fix NaN
+            var badgeLabel = isBc ? 'Barcode Printer' : 'QR Display';  // <-- fix badge
+            var actionBtn = isBc
+                ? '<button class="control-btn" onclick="openBarcodePanel(\'' + escapeAttr(port) + '\')">Print &rarr;</button>'
+                : '<button class="control-btn" onclick="openControlPanel(\'' + escapeAttr(port) + '\',\'' + escapeAttr(d.description) + '\')">Control &rarr;</button>';
+
+            html += '<tr>' +
+                '<td><span class="device-name">' + escapeHtml(port) + '</span></td>' +
+                '<td><span class="device-details">' + escapeHtml(d.description) + '</span></td>' +
+                '<td><span class="badge badge-CRIS">' + badgeLabel + '</span></td>' +
+                '<td><span class="status">' + escapeHtml(d.status) + '</span></td>' +
+                '<td>' + actionBtn + '</td>' +
+                '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    function renderTable(tbodyId, data) {
+        var tbody = document.getElementById(tbodyId);
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No devices detected</td></tr>';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            var cat = d.category || 'default';
+            html += '<tr>' +
+                '<td><span class="device-name">'   + escapeHtml(d.name)    + '</span></td>' +
+                '<td><span class="badge badge-'    + escapeHtml(cat) + '">' + escapeHtml(d.category || 'Unknown') + '</span></td>' +
+                '<td><span class="status">'        + escapeHtml(d.status)  + '</span></td>' +
+                '<td><span class="device-details">'+ escapeHtml(d.details) + '</span></td>' +
+                '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    function renderWeighingTable(data) {
+        var tbody = document.getElementById('tbody-weighing');
+        document.getElementById('count-weighing').innerHTML = data.length > 0 ? data.length + ' active' : 'waiting for data...';
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No weighing machine data received. Connect the machine and ensure it is sending data.</td></tr>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            var ago = '';
+            if (d.timestamp) {
+                var secs = Math.floor((Date.now() - d.timestamp) / 1000);
+                ago = secs < 60 ? secs + 's ago' : Math.floor(secs/60) + 'm ago';
+            }
+            html += '<tr>' +
+                '<td><span class="device-name">' + escapeHtml(d.portName) + '</span></td>' +
+                '<td><span class="badge badge-default">Weighing Machine</span></td>' +
+                '<td><span class="status">Receiving</span></td>' +
+                '<td><span class="device-name" style="color:#1a3a6b">' + escapeHtml(d.rawData) + '</span></td>' +
+                '<td><span class="device-details">' + ago + '</span></td>' +
+                '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    // ── Control Panel ─────────────────────────────────────────────────────────────
+    function openControlPanel(portName, description) {
+        activePort = portName;
+        document.getElementById('ctrl-device-name').innerHTML = description || 'CRIS QR Display';
+        document.getElementById('ctrl-device-port').innerHTML = portName;
+        clearLog();
+        addLog('Control panel opened for ' + portName, 'muted');
+        if (refreshTimer) clearInterval(refreshTimer);
+        updateColorPreviews();
+        showScreen('control-screen');
+    }
+
+    function openBarcodePanel(printerName) {
+        activeBarcodePort = printerName;
+        document.getElementById('bc-device-name').innerHTML = 'Zebra ZPL Barcode Printer';
+        document.getElementById('bc-device-port').innerHTML = printerName;
+        clearBcLog();
+        if (refreshTimer) clearInterval(refreshTimer);
+        showScreen('barcode-screen');
+    }
+
+    function clearBcLog() {
+        var log = document.getElementById('bc-log');
+        log.innerHTML = '<div class="log-entry muted">Log cleared.</div>';
+    }
+
+    function addBcLog(message, type) {
+        var log = document.getElementById('bc-log');
+        var div = document.createElement('div');
+        div.className = 'log-entry ' + (type || '');
+        div.appendChild(document.createTextNode('[' + new Date().toLocaleTimeString() + '] ' + message));
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function getField(id) {
+        var el = document.getElementById(id);
+        return el ? el.value.replace(/^\s+|\s+$/g, '') : '';
+    }
+
+    function submitBarcodePrint() {
+        var Pwbltno = getField('p-Pwbltno');
+        if (!Pwbltno) { addBcLog('Error: PWB Number is required.', 'error'); return; }
+        var stritmnoDwt = getField('p-stritmnoDwt');
+        if (!stritmnoDwt) { addBcLog('Error: Items/Weight field is required.', 'error'); return; }
+
+        addBcLog('Sending print job to ' + activeBarcodePort + '...', 'sent');
+
+        var payload = {
+            Pwbltno:                  Pwbltno,
+            ConsignorName:            getField('p-ConsignorName'),
+            ConsignorAdd:             getField('p-ConsignorAdd'),
+            ConsineeName:             getField('p-ConsineeName'),
+            ConsigneeAdd:             getField('p-ConsigneeAdd'),
+            nop:                      getField('p-nop'),
+            stritmnoDwt:              stritmnoDwt,
+            totalweight:              getField('p-totalweight'),
+            SrcStn:                   getField('p-SrcStn'),
+            DstnStn:                  getField('p-DstnStn'),
+            bktype:                   getField('p-bktype'),
+            FormNo:                   getField('p-FormNo'),
+            BookingDt:                getField('p-BookingDt'),
+            Distance:                 getField('p-Distance'),
+            majcommd:                 getField('p-majcommd'),
+            cntr:                     getField('p-cntr'),
+            railway:                  getField('p-railway'),
+            totpkgbrakevan:           getField('p-totpkgbrakevan'),
+            totwtbrakevan:            getField('p-totwtbrakevan'),
+            strScalecd:               getField('p-strScalecd'),
+            strViastn:                getField('p-strViastn'),
+            lost_item_type:           getField('p-lost_item_type'),
+            trnsstn:                  getField('p-trnsstn'),
+            stnDetailsHindi:          getField('p-stnDetailsHindi'),
+            dstnstnHindi:             getField('p-dstnstnHindi'),
+            intMajcommd:              getField('p-intMajcommd'),
+            booking_dtDDMMYYYYHHMI:   getField('p-booking_dtDDMMYYYYHHMI'),
+            strTrntype:               getField('p-strTrntype'),
+            totalchrgweight:          getField('p-totalchrgweight'),
+            Rajdhani_flag:            getField('p-Rajdhani_flag'),
+            unld_hrs:                 getField('p-unld_hrs')
+        };
+
+        authXhr('/api/barcode/print', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            onSuccess: function(code, text) {
+                try {
+                    var res = JSON.parse(text);
+                    addBcLog(res.message, res.status === 'success' ? 'received' : 'error');
+                } catch(e) {
+                    addBcLog(text, 'received');
+                }
+            },
+            onError: function() {
+                addBcLog('Network error.', 'error');
+            }
+        });
+    }
+
+    // ── Command senders ───────────────────────────────────────────────────────────
+    function quickCmd(type) {
+        sendCmd({ type: type, params: {} });
+    }
+
+    function sendDisplayString() {
+        var text = document.getElementById('ds-text').value.replace(/^\s+|\s+$/g, '');
+        if (!text) { addLog('Error: text cannot be empty.', 'error'); return; }
+        sendCmd({
+            type: 'display-string',
+            params: {
+                text:     text,
+                row:      parseInt(document.getElementById('ds-row').value,  10) || 20,
+                col:      parseInt(document.getElementById('ds-col').value,  10) || 8,
+                fontSize: parseInt(document.getElementById('ds-size').value, 10) || 24
+            }
+        });
+    }
+
+    function sendQRCode() {
+        var text = document.getElementById('qr-text').value.replace(/^\s+|\s+$/g, '');
+        if (!text) { addLog('Error: QR content cannot be empty.', 'error'); return; }
+        sendCmd({
+            type: 'display-qrcode',
+            params: {
+                text:  text,
+                row:   parseInt(document.getElementById('qr-row').value,   10) || 10,
+                col:   parseInt(document.getElementById('qr-col').value,   10) || 10,
+                width: parseInt(document.getElementById('qr-width').value, 10) || 100
+            }
+        });
+    }
+
+    function sendForegroundColor() {
+        var color = document.getElementById('fg-color').value.replace(/^\s+|\s+$/g, '');
+        if (!isValidHex(color)) { addLog('Error: invalid hex color. Use format #XXXX.', 'error'); return; }
+        sendCmd({ type: 'foreground-color', params: { color: color } });
+    }
+
+    function sendBackgroundColor() {
+        var color = document.getElementById('bg-color').value.replace(/^\s+|\s+$/g, '');
+        if (!isValidHex(color)) { addLog('Error: invalid hex color. Use format #XXXX.', 'error'); return; }
+        sendCmd({ type: 'background-color', params: { color: color } });
+    }
+
+    function sendCmd(payload) {
+        payload.port = activePort;
+        var label = payload.type + (payload.params && payload.params.text ? ' "' + payload.params.text + '"' : '');
+        addLog('Sending: ' + label, 'sent');
+
+        authXhr('/api/cris/command', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            onSuccess: function(status, text) {
+                if (status >= 200 && status < 300) {
+                    addLog(text || '(empty response)', 'received');
+                } else {
+                    addLog('Error: ' + text, 'error');
+                }
+            },
+            onError: function(err) {
+                addLog('Network error: ' + err, 'error');
+            }
+        });
+    }
+
+    // ── Log ───────────────────────────────────────────────────────────────────────
+    function addLog(message, type) {
+        var log = document.getElementById('response-log');
+        var now = new Date();
+        var ts  = now.toLocaleTimeString();
+        var div = document.createElement('div');
+        div.className = 'log-entry ' + (type || '');
+        div.appendChild(document.createTextNode('[' + ts + '] ' + message));
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function clearLog() {
+        var log = document.getElementById('response-log');
+        log.innerHTML = '<div class="log-entry muted">Log cleared.</div>';
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+    function isValidHex(color) {
+        return /^#[A-Fa-f0-9]{4,6}$/.test(color);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // For values injected into onclick="...'" attributes
+    function escapeAttr(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'");
+    }
+
+    function updateColorPreviews() {
+        setPreview('fg-color', 'fg-preview');
+        setPreview('bg-color', 'bg-preview');
+    }
+
+    function setPreview(inputId, previewId) {
+        var val     = document.getElementById(inputId).value.replace(/^\s+|\s+$/g, '');
+        var preview = document.getElementById(previewId);
+        if (!isValidHex(val)) {
+            preview.style.backgroundColor = 'transparent';
+            return;
+        }
+        var hex = val.replace('#', '');
+        if (hex.length === 4) {
+            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+        }
+        preview.style.backgroundColor = '#' + hex.substring(0, 6);
+    }
+</script>
+</body>
+</html>
