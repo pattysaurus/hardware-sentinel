@@ -39,3 +39,7 @@ build/
 
 # Environment
 .env
+
+src/main/resources/application.properties
+
+src/main/resources/keystore.p12
